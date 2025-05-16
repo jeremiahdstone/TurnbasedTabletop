@@ -88,18 +88,7 @@ This system is intended as a base for:
 
 Future improvements may include:
 - Integration with navmesh/pathfinding systems
-- RuleTile enhancement for dynamic visuals
 - ScriptableObject configuration presets
 - Level saving/loading support
 
 ---
-
-## License
-
-MIT License (or update to your organization’s license terms)
-
----
-
-## Contact
-
-For questions, contributions, or integration inquiries, please contact the developer or open an issue on the repository.
