@@ -10,7 +10,7 @@ public enum TileType
     Wall,
     Floor,
     EnemySpawn,
-    ChestSpawn,
+    Chest,
     Player1Spawn,
     Player2Spawn,
     Lava,
@@ -23,11 +23,8 @@ public enum TileType
 
 public class RoomGeneration : MonoBehaviour
 {
-    public Tilemap tilemap;
-    public TileBase floorTile;
-    public TileBase wallTile;
-    public TileBase chestTile;
-    public TileBase lavaTile;
+    public Tilemap floorWalls, LavaWater, Details, Entities;
+    public TileBase floorTile, wallTile, chestTile, lavaTile, lavaDetailTile, enemyTile, playerTile;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -41,7 +38,11 @@ public class RoomGeneration : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // Regenerate the room when the space key is pressed
+            GenerateRoom(20, 20);
+        }
     }
 
     void GenerateRoom(int width, int height)
@@ -61,9 +62,14 @@ public class RoomGeneration : MonoBehaviour
             currentPos += directions[Random.Range(0, directions.Length)];
 
             // Clamp to bounds
-            currentPos.x = Mathf.Clamp(currentPos.x, 1, width - 2);
-            currentPos.y = Mathf.Clamp(currentPos.y, 1, height - 2);
+            currentPos.x = Mathf.Clamp(currentPos.x, 2, width - 3);
+            currentPos.y = Mathf.Clamp(currentPos.y, 2, height - 3);
         }
+
+
+
+        GenerateRiver(roomLayout, width, height, TileType.Lava);
+        GenerateRiver(roomLayout, width, height, TileType.Lava);
 
         // Add walls around the edges
         for (int x = 1; x < width - 1; x++)
@@ -77,7 +83,8 @@ public class RoomGeneration : MonoBehaviour
                     {
                         for (int dy = -1; dy <= 1; dy++)
                         {
-                            if (roomLayout[x + dx, y + dy] == TileType.Floor)
+                            TileType neighbor = roomLayout[x + dx, y + dy];
+                            if (neighbor == TileType.Floor || neighbor == TileType.Lava)
                                 nearFloor = true;
                         }
                     }
@@ -87,54 +94,100 @@ public class RoomGeneration : MonoBehaviour
             }
         }
 
-        //GenerateRiver(roomLayout, width, height, TileType.Lava);
-
-
 
         DrawGrid(roomLayout);
+        PrintRoom(roomLayout);
+    }
+
+    void PrintRoom(TileType[,] grid)
+    {
+        string output = "";
+        for (int y = grid.GetLength(1) - 1; y >= 0; y--)
+        {
+            for (int x = 0; x < grid.GetLength(0); x++)
+            {
+                output += grid[x, y] switch
+                {
+                    TileType.Floor => "=",
+                    TileType.Wall => "#",
+                    TileType.Lava => "~",
+                    TileType.Chest => "C",
+                    _ => "_"
+                };
+            }
+            output += "\n";
+        }
+        Debug.Log(output);
     }
 
     void GenerateRiver(TileType[,] grid, int width, int height, TileType type)
     {
-
-        //generate lava rivers
         bool isHorizontal = Random.value > 0.5f;
-        int riverLength = Random.Range(height / 2, height);
 
-        Vector2Int startingPos = new Vector2Int(Random.Range(1, width - 1), Random.Range(1, height - 1));
+        // How long the river should be
+        int riverLength = Random.Range(height / 2, height); // You can tweak this
+
         if (isHorizontal)
         {
-            for (int i = 0; i < riverLength; i++)
+            int y = Random.Range(1, height - 1);
+            int maxStartX = Mathf.Max(1, width - riverLength - 1);
+            int startX = Random.Range(1, maxStartX);
+
+            for (int i = 0; i < riverLength && (startX + i) < width - 1; i++)
             {
-                if (grid[startingPos.x + i, startingPos.y] == TileType.Floor)
-                    grid[startingPos.x + i, startingPos.y] = type;
+                int x = startX + i;
+                if (grid[x, y] == TileType.Floor)
+                    grid[x, y] = type;
             }
+        }
+        else
+        {
+            int x = Random.Range(1, width - 1);
+            int maxStartY = Mathf.Max(1, height - riverLength - 1);
+            int startY = Random.Range(1, maxStartY);
 
-
+            for (int i = 0; i < riverLength && (startY + i) < height - 1; i++)
+            {
+                int y = startY + i;
+                if (grid[x, y] == TileType.Floor)
+                    grid[x, y] = type;
+            }
         }
     }
 
+
     public void DrawGrid(TileType[,] grid)
     {
-        tilemap.ClearAllTiles();
+        floorWalls.ClearAllTiles();
+        LavaWater.ClearAllTiles();
+        Details.ClearAllTiles();
+        Entities.ClearAllTiles();
+
+
 
         for (int x = 0; x < grid.GetLength(0); x++)
         {
             for (int y = 0; y < grid.GetLength(1); y++)
             {
                 TileType type = grid[x, y];
-                TileBase tile = null;
 
                 switch (type)
                 {
-                    case TileType.Floor: tile = floorTile; break;
-                    case TileType.Wall: tile = wallTile; break;
-                    case TileType.Lava: tile = lavaTile; break;
-                }
-
-                if (tile != null)
-                {
-                    tilemap.SetTile(new Vector3Int(x, y, 0), tile);
+                    case TileType.Floor:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
+                        break;
+                    case TileType.Wall:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), wallTile);
+                        break;
+                    case TileType.Lava:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
+                        LavaWater.SetTile(new Vector3Int(x, y, 0), lavaTile);
+                        Details.SetTile(new Vector3Int(x, y, 0), lavaDetailTile);
+                        break;
+                    case TileType.Chest:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
+                        Entities.SetTile(new Vector3Int(x, y, 0), chestTile);
+                        break;
                 }
             }
         }
