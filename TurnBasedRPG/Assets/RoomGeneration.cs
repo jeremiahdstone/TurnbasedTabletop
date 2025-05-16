@@ -13,30 +13,49 @@ public enum TileType
     Floor,
     EnemySpawn,
     Chest,
-    Player1Spawn,
-    Player2Spawn,
+    PlayerSpawn,
     Lava,
     Water,
     Pillar,
     Spikes,
+    Hole,
 }
 
 
 
 public class RoomGeneration : MonoBehaviour
 {
-    public Tilemap floorWalls, LavaWater, Details, Entities;
-    public TileBase floorTile, wallTile, chestTile, lavaTile, lavaDetailTile, enemyTile, playerTile;
+    public Tilemap floorWalls, Obstacles, Details, Entities;
+    public TileBase floorTile, wallTile, chestTile, lavaTile, lavaDetailTile, enemyTile, playerTile, holeTile, spikeTile, pillarTile;
 
-    [Header("Settings")]
-    public Vector2Int size = new Vector2Int(20, 20);
-    public int numTiles = 100;
-    public int numRivers = 2;
-    public float riverSeparationChance = 0.2f;
-    public int numHoles = 2;
-    public Vector2Int minMaxHoleSize = new Vector2Int(1, 3);
-    public Vector2Int minMaxChests = new Vector2Int(2, 4);
-    public int minChestDistance = 3;
+    [Header("Room Settings")]
+    [SerializeField] private Vector2Int size = new Vector2Int(20, 20);
+    [SerializeField] private int numTiles = 100;
+
+    [Space(20)]
+    [Header("Lava River Settings")]
+    [SerializeField] private int numRivers = 2;
+    [SerializeField] private float riverSeparationChance = 0.2f;
+
+    [Space(20)]
+    [Header("Hole Settings")]
+    [SerializeField] private int numHoles = 2;
+    [SerializeField] private Vector2Int minMaxHoleSize = new Vector2Int(1, 3);
+
+    [Space(20)]
+    [Header("Chest Settings")]
+    [SerializeField] private Vector2Int minMaxChests = new Vector2Int(2, 4);
+    [SerializeField] private int minChestDistance = 2;
+
+    [Space(20)]
+    [Header("Pillar Settings")]
+    [SerializeField] private Vector2Int minMaxPillars = new Vector2Int(5, 10);
+    [SerializeField] private int minPillarDistance = 0;
+
+    [Space(20)]
+    [Header("Player Settings")]
+    [SerializeField] private int numPlayers = 2;
+    [SerializeField] private int minPlayerDistance = 5;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -85,22 +104,32 @@ public class RoomGeneration : MonoBehaviour
 
         AddWalls(roomLayout, width, height);
 
+        for (int i = 0; i < numHoles; i++)
+            GeneratePatch(roomLayout, width, height, TileType.Hole);
 
         for (int i = 0; i < numRivers; i++)
             GenerateTrail(roomLayout, width, height, TileType.Lava);
 
-        for (int i = 0; i < numHoles; i++)
-            GeneratePatch(roomLayout, width, height, TileType.Lava);
+
 
         GenerateScatter(roomLayout, width, height, TileType.Chest, Random.Range(minMaxChests.x, minMaxChests.y), minChestDistance);
 
+        GenerateScatter(roomLayout, width, height, TileType.Pillar, Random.Range(minMaxPillars.x, minMaxPillars.y), minPillarDistance);
 
+        GenerateScatter(roomLayout, width, height, TileType.PlayerSpawn, 2, minPlayerDistance, true);
 
 
 
 
         DrawGrid(roomLayout);
         PrintRoom(roomLayout);
+
+        //impermanent solution to center the camera
+        floorWalls.CompressBounds();
+        var cellCenter = floorWalls.cellBounds.center;
+        var worldCenter = floorWalls.CellToWorld(Vector3Int.RoundToInt(cellCenter));
+
+        Camera.main.transform.position = new Vector3(worldCenter.x, worldCenter.y, -10f);
     }
 
     void PrintRoom(TileType[,] grid)
@@ -116,6 +145,9 @@ public class RoomGeneration : MonoBehaviour
                     TileType.Wall => "#",
                     TileType.Lava => "~",
                     TileType.Chest => "C",
+                    TileType.Hole => "O",
+                    TileType.PlayerSpawn => "P",
+                    TileType.Pillar => "I",
                     _ => "_"
                 };
             }
@@ -242,7 +274,7 @@ public class RoomGeneration : MonoBehaviour
             bool tooClose = false;
             foreach (var pos in placedPositions)
             {
-                if (Vector2Int.Distance(candidate, pos) < minDistance)
+                if (Vector2Int.Distance(candidate, pos) < minDistance + 1)
                 {
                     tooClose = true;
                     break;
@@ -276,7 +308,7 @@ public class RoomGeneration : MonoBehaviour
     public void DrawGrid(TileType[,] grid)
     {
         floorWalls.ClearAllTiles();
-        LavaWater.ClearAllTiles();
+        Obstacles.ClearAllTiles();
         Details.ClearAllTiles();
         Entities.ClearAllTiles();
 
@@ -298,12 +330,24 @@ public class RoomGeneration : MonoBehaviour
                         break;
                     case TileType.Lava:
                         floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
-                        LavaWater.SetTile(new Vector3Int(x, y, 0), lavaTile);
+                        Obstacles.SetTile(new Vector3Int(x, y, 0), lavaTile);
                         Details.SetTile(new Vector3Int(x, y, 0), lavaDetailTile);
                         break;
                     case TileType.Chest:
                         floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
                         Entities.SetTile(new Vector3Int(x, y, 0), chestTile);
+                        break;
+                    case TileType.Hole:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
+                        Obstacles.SetTile(new Vector3Int(x, y, 0), holeTile);
+                        break;
+                    case TileType.PlayerSpawn:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
+                        Entities.SetTile(new Vector3Int(x, y, 0), playerTile);
+                        break;
+                    case TileType.Pillar:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
+                        Obstacles.SetTile(new Vector3Int(x, y, 0), pillarTile);
                         break;
                 }
             }
