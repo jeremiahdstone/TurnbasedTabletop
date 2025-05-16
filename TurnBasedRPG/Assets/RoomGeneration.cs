@@ -1,6 +1,8 @@
 using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections.Generic;
 
 
 
@@ -23,7 +25,6 @@ public enum TileType
 
 public class RoomGeneration : MonoBehaviour
 {
-    [Header("Tiles")]
     public Tilemap floorWalls, LavaWater, Details, Entities;
     public TileBase floorTile, wallTile, chestTile, lavaTile, lavaDetailTile, enemyTile, playerTile;
 
@@ -31,6 +32,11 @@ public class RoomGeneration : MonoBehaviour
     public Vector2Int size = new Vector2Int(20, 20);
     public int numTiles = 100;
     public int numRivers = 2;
+    public float riverSeparationChance = 0.2f;
+    public int numHoles = 2;
+    public Vector2Int minMaxHoleSize = new Vector2Int(1, 3);
+    public Vector2Int minMaxChests = new Vector2Int(2, 4);
+    public int minChestDistance = 3;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -60,45 +66,37 @@ public class RoomGeneration : MonoBehaviour
         Vector2Int currentPos = new Vector2Int(width / 2, height / 2);
         for (int i = 0; i < numTiles; i++)
         {
-
-            roomLayout[currentPos.x, currentPos.y] = TileType.Floor;
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    int fx = Mathf.Clamp(currentPos.x + dx, 2, width - 3);
+                    int fy = Mathf.Clamp(currentPos.y + dy, 2, height - 3);
+                    roomLayout[fx, fy] = TileType.Floor;
+                }
+            }
 
             // Move randomly
             Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
             currentPos += directions[Random.Range(0, directions.Length)];
-
-            // Clamp to bounds
             currentPos.x = Mathf.Clamp(currentPos.x, 2, width - 3);
             currentPos.y = Mathf.Clamp(currentPos.y, 2, height - 3);
         }
 
-
-        for(int i = 0; i < numRivers; i++)
-            GenerateRiver(roomLayout, width, height, TileType.Lava);
+        AddWalls(roomLayout, width, height);
 
 
-        // Add walls around the edges
-        for (int x = 1; x < width - 1; x++)
-        {
-            for (int y = 1; y < height - 1; y++)
-            {
-                if (roomLayout[x, y] == TileType.Empty)
-                {
-                    bool nearFloor = false;
-                    for (int dx = -1; dx <= 1; dx++)
-                    {
-                        for (int dy = -1; dy <= 1; dy++)
-                        {
-                            TileType neighbor = roomLayout[x + dx, y + dy];
-                            if (neighbor == TileType.Floor || neighbor == TileType.Lava)
-                                nearFloor = true;
-                        }
-                    }
-                    if (nearFloor)
-                        roomLayout[x, y] = TileType.Wall;
-                }
-            }
-        }
+        for (int i = 0; i < numRivers; i++)
+            GenerateTrail(roomLayout, width, height, TileType.Lava);
+
+        for (int i = 0; i < numHoles; i++)
+            GeneratePatch(roomLayout, width, height, TileType.Lava);
+
+        GenerateScatter(roomLayout, width, height, TileType.Chest, Random.Range(minMaxChests.x, minMaxChests.y), minChestDistance);
+
+
+
+
 
 
         DrawGrid(roomLayout);
@@ -126,7 +124,38 @@ public class RoomGeneration : MonoBehaviour
         Debug.Log(output);
     }
 
-    void GenerateRiver(TileType[,] grid, int width, int height, TileType type)
+    void AddWalls(TileType[,] grid, int width, int height)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (grid[x, y] == TileType.Floor || grid[x, y] == TileType.Lava)
+                {
+                    // Check all 8 neighbors
+                    for (int dx = -1; dx <= 1; dx++)
+                    {
+                        for (int dy = -1; dy <= 1; dy++)
+                        {
+                            int nx = x + dx;
+                            int ny = y + dy;
+
+                            if (nx >= 0 && nx < width && ny >= 0 && ny < height)
+                            {
+                                if (grid[nx, ny] == TileType.Empty)
+                                {
+                                    grid[nx, ny] = TileType.Wall;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    void GenerateTrail(TileType[,] grid, int width, int height, TileType type)
     {
         bool isHorizontal = Random.value > 0.5f;
 
@@ -142,7 +171,7 @@ public class RoomGeneration : MonoBehaviour
             for (int i = 0; i < riverLength && (startX + i) < width - 1; i++)
             {
                 int x = startX + i;
-                if (grid[x, y] == TileType.Floor)
+                if (grid[x, y] == TileType.Floor && Random.value > riverSeparationChance)
                     grid[x, y] = type;
             }
         }
@@ -155,11 +184,93 @@ public class RoomGeneration : MonoBehaviour
             for (int i = 0; i < riverLength && (startY + i) < height - 1; i++)
             {
                 int y = startY + i;
-                if (grid[x, y] == TileType.Floor)
+                if (grid[x, y] == TileType.Floor && Random.value > riverSeparationChance)
                     grid[x, y] = type;
             }
         }
     }
+
+    void GeneratePatch(TileType[,] grid, int width, int height, TileType type)
+    {
+        Vector2Int holeSize = new Vector2Int(Random.Range(minMaxHoleSize.x, minMaxHoleSize.y), Random.Range(minMaxHoleSize.x, minMaxHoleSize.y));
+        Vector2Int holePos = new Vector2Int(Random.Range(1, width - holeSize.x - 1), Random.Range(1, height - holeSize.y - 1));
+        int floorCount = 0;
+        for (int x = holePos.x; x < holePos.x + holeSize.x; x++)
+        {
+            for (int y = holePos.y; y < holePos.y + holeSize.y; y++)
+            {
+                if (grid[x, y] == TileType.Floor)
+                    floorCount++;
+            }
+        }
+
+        // Require at least 75% of the hole to be over Floor
+        int totalTiles = holeSize.x * holeSize.y;
+        if (floorCount < totalTiles * 0.75f)
+            return; // Skip this hole
+
+        // Place the hole
+        for (int x = holePos.x; x < holePos.x + holeSize.x; x++)
+        {
+            for (int y = holePos.y; y < holePos.y + holeSize.y; y++)
+            {
+                if (grid[x, y] == TileType.Floor)
+                {
+                    grid[x, y] = type;
+                }
+            }
+        }
+    }
+
+    void GenerateScatter(TileType[,] grid, int width, int height, TileType type, int amount, int minDistance, bool requireExactAmount = false)
+    {
+        List<Vector2Int> placedPositions = new List<Vector2Int>();
+        int attempts = 0;
+        int maxAttempts = 5000;
+
+        while (placedPositions.Count < amount && attempts < maxAttempts)
+        {
+            attempts++;
+            int x = Random.Range(3, width - 4);
+            int y = Random.Range(3, height - 4);
+            Vector2Int candidate = new Vector2Int(x, y);
+
+            if (grid[x, y] != TileType.Floor)
+                continue;
+
+            // Check spacing
+            bool tooClose = false;
+            foreach (var pos in placedPositions)
+            {
+                if (Vector2Int.Distance(candidate, pos) < minDistance)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            // If too close, skip unless we *must* place and we've exhausted attempts
+            if (tooClose && requireExactAmount && attempts > maxAttempts / 2)
+            {
+                // Relax distance for critical items
+                tooClose = false;
+            }
+
+            if (!tooClose)
+            {
+                grid[x, y] = type;
+                placedPositions.Add(candidate);
+            }
+        }
+
+        // Optional warning
+        if (placedPositions.Count < amount)
+        {
+            Debug.LogWarning($"{type}: Only placed {placedPositions.Count}/{amount} with minDistance {minDistance}");
+        }
+    }
+
+
 
 
     public void DrawGrid(TileType[,] grid)

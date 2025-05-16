@@ -841,13 +841,19 @@ MonoBehaviour:
   Entities: {fileID: 395124200}
   floorTile: {fileID: 11400000, guid: f38053604a212d3428700559537daab4, type: 2}
   wallTile: {fileID: 11400000, guid: f38053604a212d3428700559537daab4, type: 2}
-  chestTile: {fileID: 11400000, guid: 93ad921c641b5ea4a808dcfe329d1ac6, type: 2}
+  chestTile: {fileID: 11400000, guid: 482217c8dfcbf3a4d9524ca414c0b53a, type: 2}
   lavaTile: {fileID: 11400000, guid: 60b5acf941423234aaef24d3b27e95c3, type: 2}
   lavaDetailTile: {fileID: 11400000, guid: b011ddb7bbdf2f142960900b9b3cd80f, type: 2}
   enemyTile: {fileID: 11400000, guid: 93ad921c641b5ea4a808dcfe329d1ac6, type: 2}
   playerTile: {fileID: 11400000, guid: 93ad921c641b5ea4a808dcfe329d1ac6, type: 2}
-  size: {x: 40, y: 40}
-  numTiles: 200
+  size: {x: 20, y: 10}
+  numTiles: 100
+  numRivers: 2
+  riverSeparationChance: 0.2
+  numHoles: 2
+  minMaxHoleSize: {x: 2, y: 3}
+  minMaxChests: {x: 2, y: 2}
+  minChestDistance: 4
 --- !u!4 &927087389
 Transform:
   m_ObjectHideFlags: 0
