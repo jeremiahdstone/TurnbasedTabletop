@@ -23,14 +23,20 @@ public enum TileType
 
 public class RoomGeneration : MonoBehaviour
 {
+    [Header("Tiles")]
     public Tilemap floorWalls, LavaWater, Details, Entities;
     public TileBase floorTile, wallTile, chestTile, lavaTile, lavaDetailTile, enemyTile, playerTile;
+
+    [Header("Settings")]
+    public Vector2Int size = new Vector2Int(20, 20);
+    public int numTiles = 100;
+    public int numRivers = 2;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         // Initialize the room generation process
-        GenerateRoom(20, 20);
+        GenerateRoom(size.x, size.y);
 
 
     }
@@ -41,7 +47,7 @@ public class RoomGeneration : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // Regenerate the room when the space key is pressed
-            GenerateRoom(20, 20);
+            GenerateRoom(size.x, size.y);
         }
     }
 
@@ -52,7 +58,7 @@ public class RoomGeneration : MonoBehaviour
 
         // Initialize the room layout with empty tiles
         Vector2Int currentPos = new Vector2Int(width / 2, height / 2);
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < numTiles; i++)
         {
 
             roomLayout[currentPos.x, currentPos.y] = TileType.Floor;
@@ -67,9 +73,9 @@ public class RoomGeneration : MonoBehaviour
         }
 
 
+        for(int i = 0; i < numRivers; i++)
+            GenerateRiver(roomLayout, width, height, TileType.Lava);
 
-        GenerateRiver(roomLayout, width, height, TileType.Lava);
-        GenerateRiver(roomLayout, width, height, TileType.Lava);
 
         // Add walls around the edges
         for (int x = 1; x < width - 1; x++)

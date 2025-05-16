@@ -846,6 +846,8 @@ MonoBehaviour:
   lavaDetailTile: {fileID: 11400000, guid: b011ddb7bbdf2f142960900b9b3cd80f, type: 2}
   enemyTile: {fileID: 11400000, guid: 93ad921c641b5ea4a808dcfe329d1ac6, type: 2}
   playerTile: {fileID: 11400000, guid: 93ad921c641b5ea4a808dcfe329d1ac6, type: 2}
+  size: {x: 40, y: 40}
+  numTiles: 200
 --- !u!4 &927087389
 Transform:
   m_ObjectHideFlags: 0
