@@ -878,13 +878,15 @@ MonoBehaviour:
   numTiles: 100
   numRivers: 2
   riverSeparationChance: 0.2
-  numHoles: 2
+  numHoles: 3
   minMaxHoleSize: {x: 2, y: 3}
-  minMaxChests: {x: 2, y: 2}
-  minChestDistance: 4
-  minMaxPillars: {x: 5, y: 10}
+  minMaxChests: {x: 2, y: 6}
+  minChestDistance: 3
+  minMaxPillars: {x: 6, y: 12}
   minPillarDistance: 0
-  numPlayers: 2
+  players:
+  - {fileID: 11400000, guid: 4ccc1da60fc3e104abbdc0836b6ae8b2, type: 2}
+  - {fileID: 11400000, guid: 166315b0079fd154fbd503b55f6aa111, type: 2}
   minPlayerDistance: 3
 --- !u!4 &927087389
 Transform:

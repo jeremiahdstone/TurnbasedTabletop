@@ -3,6 +3,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
+using System.Numerics;
 
 
 
@@ -54,14 +55,17 @@ public class RoomGeneration : MonoBehaviour
 
     [Space(20)]
     [Header("Player Settings")]
-    [SerializeField] private int numPlayers = 2;
+    [SerializeField] private TileBase[] players = new TileBase[2];
     [SerializeField] private int minPlayerDistance = 5;
+
+    private Vector2Int[] playerSpawnPositions;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         // Initialize the room generation process
-        GenerateRoom(size.x, size.y);
+        createRoom(size.x, size.y);
 
 
     }
@@ -72,11 +76,53 @@ public class RoomGeneration : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // Regenerate the room when the space key is pressed
-            GenerateRoom(size.x, size.y);
+            createRoom(size.x, size.y);
         }
     }
 
-    void GenerateRoom(int width, int height)
+    void createRoom(int width, int height)
+    {
+
+
+        bool canReach = false;
+        TileType[,] grid = new TileType[width, height];
+        Vector2Int[] playerSpawnPositions = new Vector2Int[players.Length];
+
+        while (!canReach)
+        {
+            grid = GenerateRoom(width, height);
+            playerSpawnPositions = GeneratePlayerSpawns(grid, width, height, players.Length, minPlayerDistance).ToArray();
+
+            canReach = true;
+            foreach (Vector2Int pos in playerSpawnPositions)
+            {
+                if (!CanReach(grid, pos, playerSpawnPositions[0]))
+                {
+                    canReach = false;
+                    break;
+                }
+            }
+        }
+
+
+        DrawGrid(grid);
+        
+        for(int i = 0; i < playerSpawnPositions.Length; i++)
+        {
+            Vector2Int pos = playerSpawnPositions[i];
+            
+            Entities.SetTile(new Vector3Int(pos.x, pos.y, 0), players[i]);
+        }
+
+        //impermanent solution to center the camera
+        floorWalls.CompressBounds();
+        var cellCenter = floorWalls.cellBounds.center;
+        var worldCenter = floorWalls.CellToWorld(Vector3Int.RoundToInt(cellCenter));
+
+        Camera.main.transform.position = new UnityEngine.Vector3(worldCenter.x, worldCenter.y, -10f);
+    }
+
+    TileType[,] GenerateRoom(int width, int height)
     {
         TileType[,] roomLayout = new TileType[width, height];
 
@@ -112,24 +158,17 @@ public class RoomGeneration : MonoBehaviour
 
 
 
-        GenerateScatter(roomLayout, width, height, TileType.Chest, Random.Range(minMaxChests.x, minMaxChests.y), minChestDistance);
+        GenerateScatter(roomLayout, width, height, TileType.Chest, Random.Range(minMaxChests.x, minMaxChests.y), minChestDistance, true);
 
         GenerateScatter(roomLayout, width, height, TileType.Pillar, Random.Range(minMaxPillars.x, minMaxPillars.y), minPillarDistance);
 
-        GenerateScatter(roomLayout, width, height, TileType.PlayerSpawn, 2, minPlayerDistance, true);
 
 
 
-
-        DrawGrid(roomLayout);
         PrintRoom(roomLayout);
 
-        //impermanent solution to center the camera
-        floorWalls.CompressBounds();
-        var cellCenter = floorWalls.cellBounds.center;
-        var worldCenter = floorWalls.CellToWorld(Vector3Int.RoundToInt(cellCenter));
+        return roomLayout;
 
-        Camera.main.transform.position = new Vector3(worldCenter.x, worldCenter.y, -10f);
     }
 
     void PrintRoom(TileType[,] grid)
@@ -147,7 +186,7 @@ public class RoomGeneration : MonoBehaviour
                     TileType.Chest => "C",
                     TileType.Hole => "O",
                     TileType.PlayerSpawn => "P",
-                    TileType.Pillar => "I",
+                    TileType.Pillar => "8",
                     _ => "_"
                 };
             }
@@ -303,6 +342,81 @@ public class RoomGeneration : MonoBehaviour
     }
 
 
+    List<Vector2Int> GeneratePlayerSpawns(TileType[,] grid, int width, int height, int playerCount, int minDistance)
+    {
+        const int maxAttemptsPerPlayer = 1000;
+        List<Vector2Int> playerPositions = new List<Vector2Int>();
+
+        for (int i = 0; i < playerCount; i++)
+        {
+            bool placed = false;
+
+            for (int attempt = 0; attempt < maxAttemptsPerPlayer; attempt++)
+            {
+                int x = Random.Range(2, width - 2);
+                int y = Random.Range(2, height - 2);
+
+                // Must be on a floor tile
+                if (grid[x, y] != TileType.Floor)
+                    continue;
+
+                // Check for at least one walkable neighbor (inline logic)
+                bool hasNeighbor = false;
+                Vector2Int[] directions = {
+                new Vector2Int(0, 1), new Vector2Int(0, -1),
+                new Vector2Int(1, 0), new Vector2Int(-1, 0)
+            };
+
+                foreach (var dir in directions)
+                {
+                    int nx = x + dir.x;
+                    int ny = y + dir.y;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height)
+                    {
+                        TileType neighborType = grid[nx, ny];
+                        if (IsWalkable(neighborType))
+                        {
+                            hasNeighbor = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!hasNeighbor)
+                    continue;
+
+                // Enforce distance from other players
+                bool tooClose = false;
+                foreach (var other in playerPositions)
+                {
+                    float dx = x - other.x;
+                    float dy = y - other.y;
+                    float distance = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (distance < minDistance)
+                    {
+                        tooClose = true;
+                        break;
+                    }
+                }
+
+                // Allow placement if valid or after enough failed attempts
+                if (!tooClose || attempt > maxAttemptsPerPlayer * 0.75f)
+                {
+                    grid[x, y] = TileType.PlayerSpawn;
+                    playerPositions.Add(new Vector2Int(x, y));
+                    placed = true;
+                    break;
+                }
+            }
+
+            if (!placed)
+            {
+                Debug.LogWarning($"Player {i + 1} could not be placed with full constraints. Skipped or relaxed.");
+            }
+        }
+
+        return playerPositions;
+    }
 
 
     public void DrawGrid(TileType[,] grid)
@@ -353,4 +467,57 @@ public class RoomGeneration : MonoBehaviour
             }
         }
     }
+
+    bool CanReach(TileType[,] grid, Vector2Int start, Vector2Int target)
+    {
+        int width = grid.GetLength(0);
+        int height = grid.GetLength(1);
+        bool[,] visited = new bool[width, height];
+
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        queue.Enqueue(start);
+        visited[start.x, start.y] = true;
+
+        Vector2Int[] directions = new Vector2Int[]
+        {
+        Vector2Int.up,
+        Vector2Int.down,
+        Vector2Int.left,
+        Vector2Int.right
+        };
+
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+
+            if (current == target)
+                return true; // Found a path!
+
+            foreach (Vector2Int dir in directions)
+            {
+                Vector2Int neighbor = current + dir;
+
+                if (neighbor.x >= 0 && neighbor.x < width &&
+                    neighbor.y >= 0 && neighbor.y < height &&
+                    !visited[neighbor.x, neighbor.y] &&
+                    IsWalkable(grid[neighbor.x, neighbor.y]))
+                {
+                    visited[neighbor.x, neighbor.y] = true;
+                    queue.Enqueue(neighbor);
+                }
+            }
+        }
+
+        return false; // No path found
+    }
+
+    bool IsWalkable(TileType type)
+    {
+        return type == TileType.Floor ||
+               type == TileType.PlayerSpawn ||
+               type == TileType.Lava ||
+               type == TileType.Chest;
+    }
+
+
 }
