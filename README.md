@@ -1,94 +1,141 @@
-# Procedural Room Generation System (Unity 2D Tilemap)
+Unity Procedural Room Generator
+===============================
 
-This Unity project implements a flexible and extensible system for procedurally generating 2D tile-based rooms using Unity's Tilemap system. It supports multiple tile layers, configurable generation parameters, and clear separation between visual and gameplay data.
+A modular, tilemap-driven procedural generation system for top-down 2D games in Unity. This tool uses ScriptableObject presets to generate rooms composed of walls, floors, hazards, and interactive elements like chests and player spawns. Each room guarantees player connectivity and customizable layout features.
 
----
+-------------------------------
+Features
+-------------------------------
 
-## Features
+- Scriptable Presets (`GenPreset`) for easy tuning
+- Player spawn connectivity via flood fill pathfinding
+- Randomized generation of:
+  - Floor/wall layout
+  - Lava rivers
+  - Holes (rectangular voids)
+  - Pillars and chests
+  - Player spawn points with distance constraints
+- Tilemap layer support:
+  - Floor/Walls
+  - Obstacles
+  - Details
+  - Entities
+- Camera auto-centering on generated content
+- ASCII debug output of generated rooms
 
-### Core Room Generation
-- Customizable room dimensions
-- Floor generation using random walk algorithms
-- Automatic wall placement with full corner coverage
-- Tilemap compression and camera centering support
+-------------------------------
+System Overview
+-------------------------------
 
-### Hazard and Obstacle Placement
-- Lava rivers with directional control and spacing logic
-- Randomized lava pools with variable size
-- Hole placement using RuleTiles to allow organic shapes
-- Optional spacing validation to preserve gameplay paths
+Main Components:
 
-### Entity Placement
-- Chest and player spawn placement with configurable minimum distances
-- Flexible scatter algorithm with fallback for critical spawns
-- Support for multiple entity layers (players, enemies, interactables)
+- RoomGeneration.cs: handles all generation and placement
+- GenPreset.asset: ScriptableObject containing tile assets and generation settings
+- TileType enum: describes the contents of each tile
+- Tilemaps: four layers used to separate tile categories
 
-### Tilemap Layering
-- Clean separation of visual elements:
-  - Floor and wall tiles
-  - Lava/water overlays
-  - Decorative/RuleTile details
-  - Entities (player, enemies, chests)
+Tilemap Layers:
+- floorWalls
+- Obstacles
+- Details
+- Entities
 
-### Camera and Visualization
-- Automatic centering of camera based on tilemap bounds
-- Optional zoom adjustments based on room size
-- Debugging tools (console-based grid output, warnings on placement failure)
+-------------------------------
+Setup Instructions
+-------------------------------
 
----
+1. Assign Tilemaps
+   - Attach `RoomGeneration` to a GameObject in your scene
+   - Assign the 4 tilemap layers in the inspector
 
-## Usage Instructions
+2. Create and Assign a GenPreset
+   - Right-click in the Project window → Create → Room Generation → GenPreset
+   - Fill in all required tile references and settings (room size, number of chests, etc.)
+   - Assign this GenPreset to the `genPreset` field in the `RoomGeneration` script
 
-### Setup
+3. Assign Player Tiles
+   - Set each player’s tile in the `players[]` array
+   - Each tile will be placed at a valid, walkable location
 
-1. Create a 2D Unity project.
-2. Add a Grid GameObject and create the following child Tilemaps:
-   - `FloorWalls`
-   - `Obstacles`
-   - `Details`
-   - `Entities`
-3. Assign corresponding `TileBase` assets in the `RoomGeneration` script.
-4. Attach the script to an empty GameObject.
-5. Press Play to auto-generate a room.
-6. Press **Space** at runtime to regenerate the layout.
+-------------------------------
+Usage
+-------------------------------
 
-### Configuration
+- Enter Play mode in the Unity Editor
+- A room is generated automatically on start
+- Press SPACE to regenerate the room
 
-All generation settings are exposed via `[SerializeField]` fields for tuning in the Unity Inspector:
+The system ensures:
+- Players are always on walkable floor
+- Players can reach one another
+- Entities like chests and hazards are spaced appropriately
+- The camera centers on the room bounds
 
-| Setting | Description |
-|--------|-------------|
-| Room Size | Width and height of the grid |
-| Tile Count | Number of steps for the random walk |
-| Lava Rivers | Number of rivers and separation chance |
-| Holes | Number and size range |
-| Chests | Minimum and maximum chest count and spacing |
-| Player Spawns | Number of player start positions and minimum distance |
+-------------------------------
+Generation Logic
+-------------------------------
 
----
+1. Random walker carves floor tiles from the center of the map
+2. Walls are placed around floor/lava tiles
+3. Lava rivers and holes are added using randomized trail and patch methods
+4. Scatterable items like chests and pillars are placed with minimum spacing
+5. Players are placed one at a time with:
+   - A required minimum distance from each other
+   - Walkable surroundings
+   - Connectivity confirmed via flood-fill algorithm
 
-## Code Structure
+-------------------------------
+Customization (via GenPreset)
+-------------------------------
 
-- `RoomGeneration.cs` – Central script for managing room layout, tile placement, hazard logic, and entity scattering.
-- Utility methods for:
-  - Random walk carving
-  - Controlled scatter placement
-  - River and pool generation
-  - Wall and border enforcement
-  - Camera centering based on tilemap bounds
+size:               Width and height of the room grid  
+numTiles:           Number of tiles carved during random walk  
+numRivers:          Number of lava river paths  
+riverSeparationChance: Chance to split or gap lava tiles  
+numHoles:           Number of random holes (voids)  
+minMaxHoleSize:     Min and max size of rectangular holes  
+minMaxChests:       Random range for chest count  
+minChestDistance:   Minimum distance between chests  
+minMaxPillars:      Random range for pillar count  
+minPillarDistance:  Minimum distance between pillars  
 
----
+Player-specific configuration is done in the `RoomGeneration` script:
+- players[]: TileBase array of player tiles
+- minPlayerDistance: Minimum distance between player spawns
 
-## Development Considerations
+-------------------------------
+Debugging Tools
+-------------------------------
 
-This system is intended as a base for:
-- Roguelike or dungeon-style level generation
-- Tactical grid-based gameplay
-- Testing and visualizing procedural mechanics
+- Console printout of generated room layout via `PrintRoom()`
+  - Characters:
+    
+    "=" floor  
+    "#" wall  
+    "~" lava  
+    "O" hole  
+    "C" chest  
+    "8" pillar  
+    
 
-Future improvements may include:
-- Integration with navmesh/pathfinding systems
-- ScriptableObject configuration presets
-- Level saving/loading support
+-------------------------------
+Potential Extensions
+-------------------------------
 
----
+- Multi-room dungeon support
+- Exit generation
+- Enemy spawn logic
+
+-------------------------------
+Dependencies
+-------------------------------
+
+- Unity 2021.3+  
+- Uses Unity’s built-in Tilemap system  
+- No third-party packages required  
+
+-------------------------------
+License
+-------------------------------
+
+This project is free to use and adapt. Attribution is appreciated if redistributed or published.
