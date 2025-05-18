@@ -26,32 +26,9 @@ public enum TileType
 
 public class RoomGeneration : MonoBehaviour
 {
-    public Tilemap floorWalls, Obstacles, Details, Entities;
-    public TileBase floorTile, wallTile, chestTile, lavaTile, lavaDetailTile, enemyTile, playerTile, holeTile, spikeTile, pillarTile;
+    [SerializeField] Tilemap floorWalls, Obstacles, Details, Entities;
+    [SerializeField] GenPreset genPreset;
 
-    [Header("Room Settings")]
-    [SerializeField] private Vector2Int size = new Vector2Int(20, 20);
-    [SerializeField] private int numTiles = 100;
-
-    [Space(20)]
-    [Header("Lava River Settings")]
-    [SerializeField] private int numRivers = 2;
-    [SerializeField] private float riverSeparationChance = 0.2f;
-
-    [Space(20)]
-    [Header("Hole Settings")]
-    [SerializeField] private int numHoles = 2;
-    [SerializeField] private Vector2Int minMaxHoleSize = new Vector2Int(1, 3);
-
-    [Space(20)]
-    [Header("Chest Settings")]
-    [SerializeField] private Vector2Int minMaxChests = new Vector2Int(2, 4);
-    [SerializeField] private int minChestDistance = 2;
-
-    [Space(20)]
-    [Header("Pillar Settings")]
-    [SerializeField] private Vector2Int minMaxPillars = new Vector2Int(5, 10);
-    [SerializeField] private int minPillarDistance = 0;
 
     [Space(20)]
     [Header("Player Settings")]
@@ -65,7 +42,7 @@ public class RoomGeneration : MonoBehaviour
     void Start()
     {
         // Initialize the room generation process
-        createRoom(size.x, size.y);
+        createRoom(genPreset.size.x, genPreset.size.y);
 
 
     }
@@ -76,7 +53,7 @@ public class RoomGeneration : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // Regenerate the room when the space key is pressed
-            createRoom(size.x, size.y);
+            createRoom(genPreset.size.x, genPreset.size.y);
         }
     }
 
@@ -106,11 +83,11 @@ public class RoomGeneration : MonoBehaviour
 
 
         DrawGrid(grid);
-        
-        for(int i = 0; i < playerSpawnPositions.Length; i++)
+
+        for (int i = 0; i < playerSpawnPositions.Length; i++)
         {
             Vector2Int pos = playerSpawnPositions[i];
-            
+
             Entities.SetTile(new Vector3Int(pos.x, pos.y, 0), players[i]);
         }
 
@@ -129,7 +106,7 @@ public class RoomGeneration : MonoBehaviour
 
         // Initialize the room layout with empty tiles
         Vector2Int currentPos = new Vector2Int(width / 2, height / 2);
-        for (int i = 0; i < numTiles; i++)
+        for (int i = 0; i < genPreset.numTiles; i++)
         {
             for (int dx = -1; dx <= 1; dx++)
             {
@@ -150,17 +127,17 @@ public class RoomGeneration : MonoBehaviour
 
         AddWalls(roomLayout, width, height);
 
-        for (int i = 0; i < numHoles; i++)
+        for (int i = 0; i < genPreset.numHoles; i++)
             GeneratePatch(roomLayout, width, height, TileType.Hole);
 
-        for (int i = 0; i < numRivers; i++)
+        for (int i = 0; i < genPreset.numRivers; i++)
             GenerateTrail(roomLayout, width, height, TileType.Lava);
 
 
 
-        GenerateScatter(roomLayout, width, height, TileType.Chest, Random.Range(minMaxChests.x, minMaxChests.y), minChestDistance, true);
+        GenerateScatter(roomLayout, width, height, TileType.Chest, Random.Range(genPreset.minMaxChests.x, genPreset.minMaxChests.y), genPreset.minChestDistance, true);
 
-        GenerateScatter(roomLayout, width, height, TileType.Pillar, Random.Range(minMaxPillars.x, minMaxPillars.y), minPillarDistance);
+        GenerateScatter(roomLayout, width, height, TileType.Pillar, Random.Range(genPreset.minMaxPillars.x, genPreset.minMaxPillars.y), genPreset.minPillarDistance);
 
 
 
@@ -242,7 +219,7 @@ public class RoomGeneration : MonoBehaviour
             for (int i = 0; i < riverLength && (startX + i) < width - 1; i++)
             {
                 int x = startX + i;
-                if (grid[x, y] == TileType.Floor && Random.value > riverSeparationChance)
+                if (grid[x, y] == TileType.Floor && Random.value > genPreset.riverSeparationChance)
                     grid[x, y] = type;
             }
         }
@@ -255,7 +232,7 @@ public class RoomGeneration : MonoBehaviour
             for (int i = 0; i < riverLength && (startY + i) < height - 1; i++)
             {
                 int y = startY + i;
-                if (grid[x, y] == TileType.Floor && Random.value > riverSeparationChance)
+                if (grid[x, y] == TileType.Floor && Random.value > genPreset.riverSeparationChance)
                     grid[x, y] = type;
             }
         }
@@ -263,7 +240,7 @@ public class RoomGeneration : MonoBehaviour
 
     void GeneratePatch(TileType[,] grid, int width, int height, TileType type)
     {
-        Vector2Int holeSize = new Vector2Int(Random.Range(minMaxHoleSize.x, minMaxHoleSize.y), Random.Range(minMaxHoleSize.x, minMaxHoleSize.y));
+        Vector2Int holeSize = new Vector2Int(Random.Range(genPreset.minMaxHoleSize.x, genPreset.minMaxHoleSize.y), Random.Range(genPreset.minMaxHoleSize.x, genPreset.minMaxHoleSize.y));
         Vector2Int holePos = new Vector2Int(Random.Range(1, width - holeSize.x - 1), Random.Range(1, height - holeSize.y - 1));
         int floorCount = 0;
         for (int x = holePos.x; x < holePos.x + holeSize.x; x++)
@@ -419,54 +396,7 @@ public class RoomGeneration : MonoBehaviour
     }
 
 
-    public void DrawGrid(TileType[,] grid)
-    {
-        floorWalls.ClearAllTiles();
-        Obstacles.ClearAllTiles();
-        Details.ClearAllTiles();
-        Entities.ClearAllTiles();
 
-
-
-        for (int x = 0; x < grid.GetLength(0); x++)
-        {
-            for (int y = 0; y < grid.GetLength(1); y++)
-            {
-                TileType type = grid[x, y];
-
-                switch (type)
-                {
-                    case TileType.Floor:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
-                        break;
-                    case TileType.Wall:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), wallTile);
-                        break;
-                    case TileType.Lava:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
-                        Obstacles.SetTile(new Vector3Int(x, y, 0), lavaTile);
-                        Details.SetTile(new Vector3Int(x, y, 0), lavaDetailTile);
-                        break;
-                    case TileType.Chest:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
-                        Entities.SetTile(new Vector3Int(x, y, 0), chestTile);
-                        break;
-                    case TileType.Hole:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
-                        Obstacles.SetTile(new Vector3Int(x, y, 0), holeTile);
-                        break;
-                    case TileType.PlayerSpawn:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
-                        Entities.SetTile(new Vector3Int(x, y, 0), playerTile);
-                        break;
-                    case TileType.Pillar:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), floorTile);
-                        Obstacles.SetTile(new Vector3Int(x, y, 0), pillarTile);
-                        break;
-                }
-            }
-        }
-    }
 
     bool CanReach(TileType[,] grid, Vector2Int start, Vector2Int target)
     {
@@ -519,5 +449,52 @@ public class RoomGeneration : MonoBehaviour
                type == TileType.Chest;
     }
 
+    public void DrawGrid(TileType[,] grid)
+    {
+        floorWalls.ClearAllTiles();
+        Obstacles.ClearAllTiles();
+        Details.ClearAllTiles();
+        Entities.ClearAllTiles();
 
+
+
+        for (int x = 0; x < grid.GetLength(0); x++)
+        {
+            for (int y = 0; y < grid.GetLength(1); y++)
+            {
+                TileType type = grid[x, y];
+
+                switch (type)
+                {
+                    case TileType.Floor:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
+                        break;
+                    case TileType.Wall:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.wallTile);
+                        break;
+                    case TileType.Lava:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
+                        Obstacles.SetTile(new Vector3Int(x, y, 0), genPreset.lavaTile);
+                        Details.SetTile(new Vector3Int(x, y, 0), genPreset.lavaDetailTile);
+                        break;
+                    case TileType.Chest:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
+                        Entities.SetTile(new Vector3Int(x, y, 0), genPreset.chestTile);
+                        break;
+                    case TileType.Hole:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
+                        Obstacles.SetTile(new Vector3Int(x, y, 0), genPreset.holeTile);
+                        break;
+                    case TileType.PlayerSpawn:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
+                        Entities.SetTile(new Vector3Int(x, y, 0), genPreset.playerTile);
+                        break;
+                    case TileType.Pillar:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
+                        Obstacles.SetTile(new Vector3Int(x, y, 0), genPreset.pillarTile);
+                        break;
+                }
+            }
+        }
+    }
 }
