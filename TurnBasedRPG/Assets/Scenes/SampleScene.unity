@@ -864,26 +864,7 @@ MonoBehaviour:
   Obstacles: {fileID: 1682660639}
   Details: {fileID: 1218021913}
   Entities: {fileID: 395124200}
-  floorTile: {fileID: 11400000, guid: f38053604a212d3428700559537daab4, type: 2}
-  wallTile: {fileID: 11400000, guid: f38053604a212d3428700559537daab4, type: 2}
-  chestTile: {fileID: 11400000, guid: 482217c8dfcbf3a4d9524ca414c0b53a, type: 2}
-  lavaTile: {fileID: 11400000, guid: 60b5acf941423234aaef24d3b27e95c3, type: 2}
-  lavaDetailTile: {fileID: 11400000, guid: b011ddb7bbdf2f142960900b9b3cd80f, type: 2}
-  enemyTile: {fileID: 11400000, guid: 93ad921c641b5ea4a808dcfe329d1ac6, type: 2}
-  playerTile: {fileID: 11400000, guid: 3869f94cfc888f04a8f2f2a0ce2bc9b2, type: 2}
-  holeTile: {fileID: 11400000, guid: 220918d17d4b19e409b8c3f2f8220e42, type: 2}
-  spikeTile: {fileID: 11400000, guid: 93ad921c641b5ea4a808dcfe329d1ac6, type: 2}
-  pillarTile: {fileID: 11400000, guid: a8ff1eb4b50d3fb4b932123f74618436, type: 2}
-  size: {x: 20, y: 10}
-  numTiles: 100
-  numRivers: 2
-  riverSeparationChance: 0.2
-  numHoles: 3
-  minMaxHoleSize: {x: 2, y: 3}
-  minMaxChests: {x: 2, y: 6}
-  minChestDistance: 3
-  minMaxPillars: {x: 6, y: 12}
-  minPillarDistance: 0
+  genPreset: {fileID: 11400000, guid: e13a0f25baa34d145a21c58e11516125, type: 2}
   players:
   - {fileID: 11400000, guid: 4ccc1da60fc3e104abbdc0836b6ae8b2, type: 2}
   - {fileID: 11400000, guid: 166315b0079fd154fbd503b55f6aa111, type: 2}
