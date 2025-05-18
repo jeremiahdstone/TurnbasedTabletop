@@ -139,6 +139,8 @@ public class RoomGeneration : MonoBehaviour
 
         GenerateScatter(roomLayout, width, height, TileType.Pillar, Random.Range(genPreset.minMaxPillars.x, genPreset.minMaxPillars.y), genPreset.minPillarDistance);
 
+        GenerateScatter(roomLayout, width, height, TileType.EnemySpawn, Random.Range(genPreset.minMaxEnemies.x, genPreset.minMaxEnemies.y), genPreset.minEnemyDistance);
+
 
 
 
@@ -164,6 +166,7 @@ public class RoomGeneration : MonoBehaviour
                     TileType.Hole => "O",
                     TileType.PlayerSpawn => "P",
                     TileType.Pillar => "8",
+                    TileType.EnemySpawn => "E",
                     _ => "_"
                 };
             }
@@ -445,7 +448,6 @@ public class RoomGeneration : MonoBehaviour
     {
         return type == TileType.Floor ||
                type == TileType.PlayerSpawn ||
-               type == TileType.Lava ||
                type == TileType.Chest;
     }
 
@@ -492,6 +494,10 @@ public class RoomGeneration : MonoBehaviour
                     case TileType.Pillar:
                         floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
                         Obstacles.SetTile(new Vector3Int(x, y, 0), genPreset.pillarTile);
+                        break;
+                    case TileType.EnemySpawn:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
+                        Entities.SetTile(new Vector3Int(x, y, 0), genPreset.enemyTile);
                         break;
                 }
             }

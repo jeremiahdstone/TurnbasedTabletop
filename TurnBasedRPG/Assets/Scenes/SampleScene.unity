@@ -864,7 +864,7 @@ MonoBehaviour:
   Obstacles: {fileID: 1682660639}
   Details: {fileID: 1218021913}
   Entities: {fileID: 395124200}
-  genPreset: {fileID: 11400000, guid: e13a0f25baa34d145a21c58e11516125, type: 2}
+  genPreset: {fileID: 11400000, guid: dc6e1f5d9f76a904e967bac891c8d089, type: 2}
   players:
   - {fileID: 11400000, guid: 4ccc1da60fc3e104abbdc0836b6ae8b2, type: 2}
   - {fileID: 11400000, guid: 166315b0079fd154fbd503b55f6aa111, type: 2}
