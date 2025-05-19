@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8daf697e679d35428f01bfd7a7609df, type: 3}
+  m_Name: Dark 2 Player
+  m_EditorClassIdentifier: 
+  floorTile: {fileID: 11400000, guid: 8fc89e160f11e9d459e73923f0b74329, type: 2}
+  wallTile: {fileID: 11400000, guid: 8fc89e160f11e9d459e73923f0b74329, type: 2}
+  lavaTile: {fileID: 11400000, guid: 220918d17d4b19e409b8c3f2f8220e42, type: 2}
+  lavaDetailTile: {fileID: 0}
+  holeTile: {fileID: 11400000, guid: 220918d17d4b19e409b8c3f2f8220e42, type: 2}
+  pillarTile: {fileID: 11400000, guid: 81599157c56b1924f8d7bb9afca3208f, type: 2}
+  SpikePrefab: {fileID: 0}
+  chestPrefab: {fileID: 169514819671846416, guid: 5295c1e944ccf8c4aa224eb143f5ace3, type: 3}
+  enemyPrefab: {fileID: 4320890335857909041, guid: 257e8f750be999d42b79f9bde1fea5f1, type: 3}
+  playerPrefabs:
+  - {fileID: 4514552492501069245, guid: 56fdddf3ee99e984eb68b17eff2cc5db, type: 3}
+  - {fileID: 5039494354166560254, guid: 210cf897ca49bad43857e9f76815d66e, type: 3}
+  size: {x: 20, y: 12}
+  numTiles: 100
+  numRivers: 8
+  riverSeparationChance: 0.4
+  numHoles: 3
+  minMaxHoleSize: {x: 3, y: 4}
+  minMaxChests: {x: 3, y: 5}
+  minChestDistance: 3
+  minMaxPillars: {x: 8, y: 12}
+  minPillarDistance: 1
+  minMaxEnemies: {x: 1, y: 4}
+  minEnemyDistance: 0
+  minPlayerDistance: 5

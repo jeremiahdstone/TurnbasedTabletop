@@ -377,7 +377,7 @@ GameObject:
   - component: {fileID: 670509369}
   - component: {fileID: 670509368}
   m_Layer: 0
-  m_Name: Tilemap
+  m_Name: Floor & Walls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -625,12 +625,7 @@ MonoBehaviour:
   floorWalls: {fileID: 670509369}
   Obstacles: {fileID: 1682660639}
   Details: {fileID: 1218021913}
-  Entities: {fileID: 0}
   genPreset: {fileID: 11400000, guid: dc6e1f5d9f76a904e967bac891c8d089, type: 2}
-  players:
-  - {fileID: 11400000, guid: 4ccc1da60fc3e104abbdc0836b6ae8b2, type: 2}
-  - {fileID: 11400000, guid: 166315b0079fd154fbd503b55f6aa111, type: 2}
-  minPlayerDistance: 3
 --- !u!4 &927087389
 Transform:
   m_ObjectHideFlags: 0
@@ -640,7 +635,7 @@ Transform:
   m_GameObject: {fileID: 927087387}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.451412, y: -0.811289, z: -9.930946}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -658,7 +653,7 @@ GameObject:
   - component: {fileID: 1218021913}
   - component: {fileID: 1218021912}
   m_Layer: 0
-  m_Name: Tilemap (2)
+  m_Name: Details
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -895,7 +890,7 @@ GameObject:
   - component: {fileID: 1682660639}
   - component: {fileID: 1682660638}
   m_Layer: 0
-  m_Name: Tilemap (1)
+  m_Name: Obstacles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
