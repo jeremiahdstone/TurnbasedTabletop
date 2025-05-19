@@ -14,14 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floorTile: {fileID: 11400000, guid: f38053604a212d3428700559537daab4, type: 2}
   wallTile: {fileID: 11400000, guid: f38053604a212d3428700559537daab4, type: 2}
-  chestTile: {fileID: 11400000, guid: 482217c8dfcbf3a4d9524ca414c0b53a, type: 2}
   lavaTile: {fileID: 11400000, guid: 60b5acf941423234aaef24d3b27e95c3, type: 2}
   lavaDetailTile: {fileID: 11400000, guid: b011ddb7bbdf2f142960900b9b3cd80f, type: 2}
-  enemyTile: {fileID: 11400000, guid: 54a7dea0c850bca499241aaf6407ecc7, type: 2}
-  playerTile: {fileID: 11400000, guid: 4ccc1da60fc3e104abbdc0836b6ae8b2, type: 2}
   holeTile: {fileID: 11400000, guid: 220918d17d4b19e409b8c3f2f8220e42, type: 2}
-  spikeTile: {fileID: 11400000, guid: 93ad921c641b5ea4a808dcfe329d1ac6, type: 2}
   pillarTile: {fileID: 11400000, guid: a8ff1eb4b50d3fb4b932123f74618436, type: 2}
+  SpikePrefab: {fileID: 0}
+  chestPrefab: {fileID: 169514819671846416, guid: 5295c1e944ccf8c4aa224eb143f5ace3, type: 3}
+  enemyPrefab: {fileID: 4320890335857909041, guid: 257e8f750be999d42b79f9bde1fea5f1, type: 3}
+  playerPrefabs:
+  - {fileID: 4514552492501069245, guid: 56fdddf3ee99e984eb68b17eff2cc5db, type: 3}
+  - {fileID: 5039494354166560254, guid: 210cf897ca49bad43857e9f76815d66e, type: 3}
   size: {x: 20, y: 10}
   numTiles: 150
   numRivers: 2
