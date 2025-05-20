@@ -26,16 +26,15 @@ public enum TileType
 
 public class RoomGeneration : MonoBehaviour
 {
-    [SerializeField] Tilemap floorWalls, Obstacles, Details, Entities;
+    [SerializeField] Tilemap floorWalls, Obstacles, Details;
     [SerializeField] GenPreset genPreset;
 
 
     [Space(20)]
     [Header("Player Settings")]
-    [SerializeField] private TileBase[] players = new TileBase[2];
-    [SerializeField] private int minPlayerDistance = 5;
-
+    
     private Vector2Int[] playerSpawnPositions;
+    private GameObject runtimeEntitiesParent;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -63,12 +62,12 @@ public class RoomGeneration : MonoBehaviour
 
         bool canReach = false;
         TileType[,] grid = new TileType[width, height];
-        Vector2Int[] playerSpawnPositions = new Vector2Int[players.Length];
+        playerSpawnPositions = new Vector2Int[genPreset.playerPrefabs.Length];
 
         while (!canReach)
         {
             grid = GenerateRoom(width, height);
-            playerSpawnPositions = GeneratePlayerSpawns(grid, width, height, players.Length, minPlayerDistance).ToArray();
+            playerSpawnPositions = GeneratePlayerSpawns(grid, width, height, genPreset.playerPrefabs.Length, genPreset.minPlayerDistance).ToArray();
 
             canReach = true;
             foreach (Vector2Int pos in playerSpawnPositions)
@@ -76,6 +75,7 @@ public class RoomGeneration : MonoBehaviour
                 if (!CanReach(grid, pos, playerSpawnPositions[0]))
                 {
                     canReach = false;
+                    PrintRoom(grid);
                     break;
                 }
             }
@@ -83,13 +83,8 @@ public class RoomGeneration : MonoBehaviour
 
 
         DrawGrid(grid);
-
-        for (int i = 0; i < playerSpawnPositions.Length; i++)
-        {
-            Vector2Int pos = playerSpawnPositions[i];
-
-            Entities.SetTile(new Vector3Int(pos.x, pos.y, 0), players[i]);
-        }
+        SpawnEntities(grid);
+        
 
         //impermanent solution to center the camera
         floorWalls.CompressBounds();
@@ -139,14 +134,18 @@ public class RoomGeneration : MonoBehaviour
 
         GenerateScatter(roomLayout, width, height, TileType.Pillar, Random.Range(genPreset.minMaxPillars.x, genPreset.minMaxPillars.y), genPreset.minPillarDistance);
 
+        GenerateScatter(roomLayout, width, height, TileType.EnemySpawn, Random.Range(genPreset.minMaxEnemies.x, genPreset.minMaxEnemies.y), genPreset.minEnemyDistance);
+
+        
 
 
-
-        PrintRoom(roomLayout);
+        //PrintRoom(roomLayout);
 
         return roomLayout;
 
     }
+
+
 
     void PrintRoom(TileType[,] grid)
     {
@@ -164,6 +163,7 @@ public class RoomGeneration : MonoBehaviour
                     TileType.Hole => "O",
                     TileType.PlayerSpawn => "P",
                     TileType.Pillar => "8",
+                    TileType.EnemySpawn => "E",
                     _ => "_"
                 };
             }
@@ -445,7 +445,6 @@ public class RoomGeneration : MonoBehaviour
     {
         return type == TileType.Floor ||
                type == TileType.PlayerSpawn ||
-               type == TileType.Lava ||
                type == TileType.Chest;
     }
 
@@ -454,7 +453,6 @@ public class RoomGeneration : MonoBehaviour
         floorWalls.ClearAllTiles();
         Obstacles.ClearAllTiles();
         Details.ClearAllTiles();
-        Entities.ClearAllTiles();
 
 
 
@@ -477,24 +475,61 @@ public class RoomGeneration : MonoBehaviour
                         Obstacles.SetTile(new Vector3Int(x, y, 0), genPreset.lavaTile);
                         Details.SetTile(new Vector3Int(x, y, 0), genPreset.lavaDetailTile);
                         break;
-                    case TileType.Chest:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
-                        Entities.SetTile(new Vector3Int(x, y, 0), genPreset.chestTile);
-                        break;
                     case TileType.Hole:
                         floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
                         Obstacles.SetTile(new Vector3Int(x, y, 0), genPreset.holeTile);
-                        break;
-                    case TileType.PlayerSpawn:
-                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
-                        Entities.SetTile(new Vector3Int(x, y, 0), genPreset.playerTile);
                         break;
                     case TileType.Pillar:
                         floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
                         Obstacles.SetTile(new Vector3Int(x, y, 0), genPreset.pillarTile);
                         break;
+                    case TileType.Chest:
+                    case TileType.EnemySpawn:
+                    case TileType.PlayerSpawn:
+                        floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
+                        break;
+
                 }
             }
         }
     }
+
+    void SpawnEntities(TileType[,] grid)
+    {
+        ClearOldEntities(); // before spawning
+
+        int playerNumber = 0;
+        for (int x = 0; x < grid.GetLength(0); x++)
+        {
+            for (int y = 0; y < grid.GetLength(1); y++)
+            {
+                Vector3Int cell = new Vector3Int(x, y, 0);
+                UnityEngine.Vector3 worldPos = floorWalls.CellToWorld(cell) + floorWalls.cellSize / 2;
+
+                switch (grid[x, y])
+                {
+                    case TileType.PlayerSpawn:
+                        Instantiate(genPreset.playerPrefabs[playerNumber], worldPos, UnityEngine.Quaternion.identity, runtimeEntitiesParent.transform);
+                        playerNumber++;
+                        break;
+                    case TileType.EnemySpawn:
+                        Instantiate(genPreset.enemyPrefab, worldPos, UnityEngine.Quaternion.identity, runtimeEntitiesParent.transform);
+                        break;
+                    case TileType.Chest:
+                        Instantiate(genPreset.chestPrefab, worldPos, UnityEngine.Quaternion.identity, runtimeEntitiesParent.transform);
+                        break;
+                }
+            }
+        }
+    }
+
+
+    void ClearOldEntities()
+    {
+        if (runtimeEntitiesParent != null)
+            Destroy(runtimeEntitiesParent);
+
+        runtimeEntitiesParent = new GameObject("Entities");
+    }
+
 }
