@@ -34,5 +34,6 @@ MonoBehaviour:
   minChestDistance: 3
   minMaxPillars: {x: 8, y: 12}
   minPillarDistance: 0
-  minMaxEnemies: {x: 1, y: 3}
+  minMaxEnemies: {x: 1, y: 1}
   minEnemyDistance: 0
+  minPlayerDistance: 5
