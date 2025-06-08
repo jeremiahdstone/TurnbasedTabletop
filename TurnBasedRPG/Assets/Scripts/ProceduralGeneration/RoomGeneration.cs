@@ -93,6 +93,15 @@ namespace dungeonGen
             DrawGrid(grid);
             SpawnEntities(grid);
 
+            /*-------------------------------------------------------------*/
+            if (GameManager.Instance == null) //(GAME SPECIFIC CODE) Update the GameManager with the generated grid
+            {
+                GameObject gm = new GameObject("GameManager");
+                gm.AddComponent<GameManager>();
+                GameManager.Instance.grid = grid;
+            }
+            GameManager.Instance.grid = grid; 
+            /*-------------------------------------------------------------*/
 
             //impermanent solution to center the camera
             floorWalls.CompressBounds();
