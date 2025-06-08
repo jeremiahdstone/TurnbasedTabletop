@@ -18,7 +18,7 @@ namespace dungeonGen
         Floor,
         EnemySpawn,
         Chest,
-        PlayerSpawn,
+        PlayerPosition,
         Lava,
         Water,
         Pillar,
@@ -98,9 +98,8 @@ namespace dungeonGen
             {
                 GameObject gm = new GameObject("GameManager");
                 gm.AddComponent<GameManager>();
-                GameManager.Instance.grid = grid;
             }
-            GameManager.Instance.grid = grid; 
+            GameManager.Instance.SetGrid(ToStringGrid(grid)); 
             /*-------------------------------------------------------------*/
 
             //impermanent solution to center the camera
@@ -162,7 +161,31 @@ namespace dungeonGen
 
         }
 
+        public static string[,] ToStringGrid(TileType[,] tileGrid) //(GAME SPECIFIC CODE) easier use for fluctuating number of players
+    {
+        int width = tileGrid.GetLength(0);
+        int height = tileGrid.GetLength(1);
+        int playerNumber = 1;
+        string[,] stringGrid = new string[width, height];
 
+        for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
+        {
+            TileType type = tileGrid[x, y];
+            switch (type)
+            {
+                case TileType.PlayerPosition:
+                    stringGrid[x, y] = "P" + playerNumber;
+                    playerNumber++;
+                    break;
+                default:
+                    stringGrid[x, y] = type.ToString().ToLower(); // e.g. "wall", "floor"
+                    break;
+            }
+        }
+
+        return stringGrid;
+    }
 
         void PrintRoom(TileType[,] grid)
         {
@@ -178,7 +201,7 @@ namespace dungeonGen
                         TileType.Lava => "~",
                         TileType.Chest => "C",
                         TileType.Hole => "O",
-                        TileType.PlayerSpawn => "P",
+                        TileType.PlayerPosition => "P",
                         TileType.Pillar => "8",
                         TileType.EnemySpawn => "E",
                         _ => "_"
@@ -396,7 +419,7 @@ namespace dungeonGen
                     // Allow placement if valid or after enough failed attempts
                     if (!tooClose || attempt > maxAttemptsPerPlayer * 0.75f)
                     {
-                        grid[x, y] = TileType.PlayerSpawn;
+                        grid[x, y] = TileType.PlayerPosition;
                         playerPositions.Add(new Vector2Int(x, y));
                         placed = true;
                         break;
@@ -461,7 +484,7 @@ namespace dungeonGen
         bool IsWalkable(TileType type)
         {
             return type == TileType.Floor ||
-                   type == TileType.PlayerSpawn ||
+                   type == TileType.PlayerPosition ||
                    type == TileType.Chest;
         }
 
@@ -502,7 +525,7 @@ namespace dungeonGen
                             break;
                         case TileType.Chest:
                         case TileType.EnemySpawn:
-                        case TileType.PlayerSpawn:
+                        case TileType.PlayerPosition:
                             floorWalls.SetTile(new Vector3Int(x, y, 0), genPreset.floorTile);
                             break;
 
@@ -525,7 +548,7 @@ namespace dungeonGen
 
                     switch (grid[x, y])
                     {
-                        case TileType.PlayerSpawn:
+                        case TileType.PlayerPosition:
                             Instantiate(genPreset.playerPrefabs[playerNumber], worldPos, UnityEngine.Quaternion.identity, runtimeEntitiesParent.transform);
                             playerNumber++;
                             break;
