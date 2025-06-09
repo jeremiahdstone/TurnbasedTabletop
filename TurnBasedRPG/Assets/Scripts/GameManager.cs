@@ -4,7 +4,7 @@ using dungeonGen;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-    public string[,] grid { get;  private set; }
+    public string[,] grid { get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -42,7 +42,47 @@ public class GameManager : MonoBehaviour
         grid[gridPos.x, gridPos.y] = value;
 
         Debug.Log(gridPos);
+
+        PrintRoom(grid);
     }
+
+    public static void PrintRoom(string[,] grid)
+    {
+        if (grid == null)
+        {
+            Debug.LogError("Grid is null.");
+            return;
+        }
+
+        string output = "";
+        int width = grid.GetLength(0);
+        int height = grid.GetLength(1);
+
+        for (int y = height - 1; y >= 0; y--)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                string tile = grid[x, y]?.Trim().ToLower();
+
+                output += tile switch
+                {
+                    "floor" => "=",
+                    "wall" => "#",
+                    "lava" => "~",
+                    "chest" => "C",
+                    "hole" => "O",
+                    "pillar" => "8",
+                    "enemyspawn" => "E",
+                    _ when tile != null && tile.StartsWith("p") => "P",
+                    _ => "_"
+                };
+            }
+            output += "\n";
+        }
+
+        Debug.Log(output);
+    }
+
 
     // Update is called once per frame
     void Update()

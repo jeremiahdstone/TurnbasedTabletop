@@ -124,7 +124,6 @@ public static class AStarPathfinder
         switch (tile)
         {
             case "floor":
-            case "chest":
                 return true;
             default:
                 return false;
