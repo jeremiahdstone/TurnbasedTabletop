@@ -22,6 +22,8 @@ public class GridDragMover : MonoBehaviour
 
     void OnMouseDown()
     {
+        if (GameManager.Instance.currentTurnPlayer != gameObject)
+            return;
         isDragging = true;
         Vector3 mouseWorld = GetMouseWorldPosition();
         offset = transform.position - mouseWorld;
@@ -30,6 +32,7 @@ public class GridDragMover : MonoBehaviour
 
     void OnMouseDrag()
     {
+
         if (!isDragging) return;
         Vector3 mouseWorld = GetMouseWorldPosition();
         transform.position = mouseWorld + offset;
@@ -80,6 +83,9 @@ public class GridDragMover : MonoBehaviour
 
     void OnMouseUp()
     {
+        if (GameManager.Instance.currentTurnPlayer != gameObject)
+            return;
+
         isDragging = false;
 
         Vector2 snappedPosition = new Vector2(
@@ -118,6 +124,13 @@ public class GridDragMover : MonoBehaviour
         player.currentPosition = finalStep;
         player.useDistance(path.Count - 1);
         clearPath();
+
+        // TEMPORARY: change turn after moving
+        if( player.distanceLeft <= 0)
+        {
+            GameManager.Instance.changeTurn();
+        }
+        
     }
 
 

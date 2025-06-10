@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 using dungeonGen;
 
 public class GameManager : MonoBehaviour
@@ -6,10 +7,26 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public string[,] grid { get; private set; }
 
+    public int turn = 1;
+    public List<GameObject> players = new List<GameObject>();
+    public GameObject currentTurnPlayer;
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         Instance = this;
+        
+
+    }
+
+    public void changeTurn()
+    {
+        turn++;
+        int currentIndex = players.IndexOf(currentTurnPlayer);
+        currentIndex = (currentIndex + 1) % players.Count;
+        currentTurnPlayer = players[currentIndex];
+        currentTurnPlayer.GetComponent<Player>().startTurn();
     }
 
     public void SetGrid(string[,] newGrid)
@@ -83,6 +100,7 @@ public class GameManager : MonoBehaviour
         Debug.Log(output);
     }
 
+    
 
     // Update is called once per frame
     void Update()

@@ -5,10 +5,11 @@ using UnityEditor.Rendering;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] public int PlayerNumber { get; private set; } = 1;
+    [SerializeField] public int PlayerNumber = 1;
 
     [Header("Player Settings")]
-    [SerializeField] private int health = 100;
+    [SerializeField] private int maxHealth = 3;
+    [SerializeField] public int health = 3;
     
     [SerializeField] public int maxDistance = 3;
     [SerializeField] public int distanceLeft { get; private set; } = 3;
@@ -25,12 +26,19 @@ public class Player : MonoBehaviour
     void Awake()
     {
         distanceLeft = maxDistance + bonusDistance;
+        health = maxHealth + bonusHealth;
     }
 
     // This method is called when the player takes damage
     public void TakeDamage(int damage)
     {
         health -= damage;
+    }
+
+    public void startTurn()
+    {
+        distanceLeft = maxDistance + bonusDistance;
+        // actions available = 1 + bonus
     }
 
     public void useDistance(int distance)

@@ -89,9 +89,7 @@ namespace dungeonGen
                 }
             }
 
-            PrintRoom(grid);
-            DrawGrid(grid);
-            SpawnEntities(grid);
+            
 
             /*-------------------------------------------------------------*/
             if (GameManager.Instance == null) //(GAME SPECIFIC CODE) Update the GameManager with the generated grid
@@ -99,9 +97,15 @@ namespace dungeonGen
                 GameObject gm = new GameObject("GameManager");
                 gm.AddComponent<GameManager>();
             }
-            GameManager.Instance.SetGrid(ToStringGrid(grid)); 
+            GameManager.Instance.SetGrid(ToStringGrid(grid));
             /*-------------------------------------------------------------*/
+            
+            PrintRoom(grid);
+            DrawGrid(grid);
+            SpawnEntities(grid);
 
+            GameManager.Instance.currentTurnPlayer = GameManager.Instance.players[0]; // (GAME SPECIFIC CODE)
+            GameManager.Instance.currentTurnPlayer.GetComponent<Player>().startTurn(); // (GAME SPECIFIC CODE)
             //impermanent solution to center the camera
             floorWalls.CompressBounds();
             var cellCenter = floorWalls.cellBounds.center;
@@ -549,7 +553,9 @@ namespace dungeonGen
                     switch (grid[x, y])
                     {
                         case TileType.PlayerPosition:
-                            Instantiate(genPreset.playerPrefabs[playerNumber], worldPos, UnityEngine.Quaternion.identity, runtimeEntitiesParent.transform);
+                            GameObject player = Instantiate(genPreset.playerPrefabs[playerNumber], worldPos, UnityEngine.Quaternion.identity, runtimeEntitiesParent.transform);
+                            GameManager.Instance.players.Add(player);
+                            player.GetComponent<Player>().PlayerNumber = playerNumber + 1; // Set player number
                             playerNumber++;
                             break;
                         case TileType.EnemySpawn:
