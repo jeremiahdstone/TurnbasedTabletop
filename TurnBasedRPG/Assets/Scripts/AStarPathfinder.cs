@@ -7,7 +7,6 @@ public static class AStarPathfinder
     {
         if (GameManager.Instance == null || GameManager.Instance.grid == null)
         {
-            Debug.LogError("Pathfinding failed: GameManager or grid is null.");
             return null;
         }
 
@@ -17,13 +16,7 @@ public static class AStarPathfinder
 
         if (!InBounds(start, width, height) || !InBounds(goal, width, height))
         {
-            Debug.LogWarning("Pathfinding aborted: start or goal out of bounds.");
             return null;
-        }
-
-        if (goal != start && !IsWalkable(grid[goal.x, goal.y]))
-        {
-            Debug.LogWarning("Goal is not walkable — fallback to partial path. " + goal + " Tile: " + grid[goal.x, goal.y]);
         }
 
         HashSet<Vector2Int> closedSet = new HashSet<Vector2Int>();
@@ -77,7 +70,7 @@ public static class AStarPathfinder
         // Return partial path to best reachable tile
         if (bestSoFar != start)
         {
-            Debug.LogWarning("Returning partial path — goal was unreachable.");
+            
             return ReconstructPath(cameFrom, bestSoFar);
         }
 

@@ -1,18 +1,23 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Tilemaps;
 
 public class GridDragMover : MonoBehaviour
 {
-    public float gridSize = 1f;  // Size of each grid cell
+    public Tilemap pathTilemap;
+    public RuleTile pathTile;
+
+    private float gridSize = 1f; //Size of each grid cell
     private bool isDragging = false;
     private Vector3 offset;
     private Camera mainCam;
     Player player;
 
-    void Start()
+    void Awake()
     {
         player = GetComponent<Player>();
         mainCam = Camera.main;
+        pathTilemap = GameObject.Find("PathTilemap").GetComponent<Tilemap>();
     }
 
     void OnMouseDown()
@@ -35,18 +40,42 @@ public class GridDragMover : MonoBehaviour
                 Mathf.RoundToInt(transform.position.x),
                 Mathf.RoundToInt(transform.position.y)
             ),
-            player.maxDistance
+            player.distanceLeft
         );
-        if (path != null && path.Count > 0)
+
+        drawPath(path);
+
+    }
+
+    void drawPath(List<Vector2Int> path)
+    {
+        pathTilemap.ClearAllTiles(); // Clear previous path tiles
+
+        if (path == null || path.Count == 0) return;
+
+        for (int i = 0; i < path.Count - 1; i++)
         {
-            for (int i = 0; i < path.Count; i++)
-            {
-                Vector3 worldPos = GameManager.Instance.GridToWorld(path[i]);
-                if (i + 1 >= path.Count) break; // Prevent out of bounds
-                Debug.DrawLine(worldPos, GameManager.Instance.GridToWorld(path[i + 1]), Color.green, 0.1f);
-            }
+            Vector3 worldPosA = GameManager.Instance.GridToWorld(path[i]);
+            Vector3 worldPosB = GameManager.Instance.GridToWorld(path[i + 1]);
+            Debug.DrawLine(worldPosA, worldPosB, Color.green, 0.1f);
+
+            pathTilemap.SetTile(
+                new Vector3Int(GameManager.Instance.WorldToGrid(worldPosA).x, GameManager.Instance.WorldToGrid(worldPosA).y, 0),
+                pathTile
+            );
         }
 
+        pathTilemap.SetTile(
+                new Vector3Int(GameManager.Instance.WorldToGrid(path[path.Count - 1]).x, GameManager.Instance.WorldToGrid(path[path.Count - 1]).y, 0),
+                pathTile
+            );
+
+
+    }
+
+    void clearPath()
+    {
+        pathTilemap.ClearAllTiles();
     }
 
     void OnMouseUp()
@@ -66,30 +95,20 @@ public class GridDragMover : MonoBehaviour
         List<Vector2Int> path = AStarPathfinder.FindPath(
             player.currentPosition,
             targetGrid,
-            player.maxDistance
+            player.distanceLeft
         );
 
-        if (path.Count == 0)
+        if (path == null || path.Count == 0)
         {
             Debug.LogWarning("No valid path found.");
+            transform.position = GameManager.Instance.GridToWorld(player.currentPosition);
+            clearPath();
             return;
         }
 
-        // Visualize the path
-        for (int i = 0; i < path.Count - 1; i++)
-        {
-            Vector3 worldPosA = GameManager.Instance.GridToWorld(path[i]);
-            Vector3 worldPosB = GameManager.Instance.GridToWorld(path[i + 1]);
-            Debug.DrawLine(worldPosA, worldPosB, Color.green, 1f);
-        }
+
 
         Vector2Int finalStep = path[path.Count - 1];
-
-        Debug.DrawLine(
-            GameManager.Instance.GridToWorld(player.currentPosition),
-            GameManager.Instance.GridToWorld(finalStep),
-            Color.red, 2f
-        );
 
         player.targetPosition = finalStep;
         GameManager.Instance.setGridPosition(player.currentPosition, "floor");
@@ -97,6 +116,8 @@ public class GridDragMover : MonoBehaviour
 
         transform.position = GameManager.Instance.GridToWorld(finalStep);
         player.currentPosition = finalStep;
+        player.useDistance(path.Count - 1);
+        clearPath();
     }
 
 

@@ -9,8 +9,9 @@ public class Player : MonoBehaviour
 
     [Header("Player Settings")]
     [SerializeField] private int health = 100;
-    [SerializeField] private int usedDistance = 0;
+    
     [SerializeField] public int maxDistance = 3;
+    [SerializeField] public int distanceLeft { get; private set; } = 3;
     
 
     [Header("Bonuses")]
@@ -21,13 +22,28 @@ public class Player : MonoBehaviour
     public Vector2Int currentPosition { get;  set; }
     public Vector2Int targetPosition { get;  set; }
 
+    void Awake()
+    {
+        distanceLeft = maxDistance + bonusDistance;
+    }
+
     // This method is called when the player takes damage
     public void TakeDamage(int damage)
     {
         health -= damage;
     }
 
-    
+    public void useDistance(int distance)
+    {
+        if (distanceLeft >= distance)
+        {
+            distanceLeft -= distance;
+        }
+        else
+        {
+            Debug.LogWarning("Not enough distance left to use.");
+        }
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
