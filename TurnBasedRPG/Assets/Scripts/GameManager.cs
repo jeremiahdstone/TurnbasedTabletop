@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
 
     public int turn = 1;
     public List<GameObject> players = new List<GameObject>();
+    
     public GameObject currentTurnPlayer;
 
 
@@ -22,11 +23,27 @@ public class GameManager : MonoBehaviour
 
     public void changeTurn()
     {
+        GameObject PlayerUI = GameObject.Find("PlayerUI " + currentTurnPlayer.GetComponent<Player>().PlayerNumber.ToString());
+        PlayerUI.SetActive(false);
         turn++;
         int currentIndex = players.IndexOf(currentTurnPlayer);
         currentIndex = (currentIndex + 1) % players.Count;
         currentTurnPlayer = players[currentIndex];
         currentTurnPlayer.GetComponent<Player>().startTurn();
+        PlayerUI = GameObject.Find("PlayerUI " + currentTurnPlayer.GetComponent<Player>().PlayerNumber.ToString());
+        PlayerUI.SetActive(true);
+    }
+
+    public void useAction()
+    {
+        if (currentTurnPlayer != null)
+        {
+            currentTurnPlayer.GetComponent<Player>().useAction();
+        }
+        else
+        {
+            Debug.LogWarning("No player is currently taking their turn.");
+        }
     }
 
     public void SetGrid(string[,] newGrid)

@@ -125,10 +125,10 @@ public class GridDragMover : MonoBehaviour
         player.useDistance(path.Count - 1);
         clearPath();
 
-        // TEMPORARY: change turn after moving
+        // TEMPORARY: check end turn
         if( player.distanceLeft <= 0)
         {
-            GameManager.Instance.changeTurn();
+            player.checkEndTurn();
         }
         
     }

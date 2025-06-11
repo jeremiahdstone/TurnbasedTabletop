@@ -44,7 +44,10 @@ namespace dungeonGen
             // Initialize the room generation process
             createRoom(genPreset.size.x, genPreset.size.y);
 
-
+            
+            // IMPERMANENT SOLUTION: Disable PlayerUI for all players at the start
+            //GameObject.Find("PlayerUI 1").SetActive(false);
+            GameObject.Find("PlayerUI 2").SetActive(false);
         }
 
         // Update is called once per frame
@@ -89,9 +92,10 @@ namespace dungeonGen
                 }
             }
 
-            
+
 
             /*-------------------------------------------------------------*/
+            
             if (GameManager.Instance == null) //(GAME SPECIFIC CODE) Update the GameManager with the generated grid
             {
                 GameObject gm = new GameObject("GameManager");
@@ -106,6 +110,7 @@ namespace dungeonGen
 
             GameManager.Instance.currentTurnPlayer = GameManager.Instance.players[0]; // (GAME SPECIFIC CODE)
             GameManager.Instance.currentTurnPlayer.GetComponent<Player>().startTurn(); // (GAME SPECIFIC CODE)
+            
             //impermanent solution to center the camera
             floorWalls.CompressBounds();
             var cellCenter = floorWalls.cellBounds.center;
