@@ -222,6 +222,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &37593859 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2316726737890064501, guid: f0b40ca16bc71cc49b40fcced0b16f7f, type: 3}
+  m_PrefabInstance: {fileID: 386334785}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &143733138
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,6 +258,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turn: 1
   players: []
+  playerUIs:
+  - {fileID: 1935283924}
+  - {fileID: 37593859}
   currentTurnPlayer: {fileID: 0}
 --- !u!4 &143733140
 Transform:
@@ -280,6 +288,26 @@ PrefabInstance:
     - target: {fileID: 2316726737890064501, guid: f0b40ca16bc71cc49b40fcced0b16f7f, type: 3}
       propertyPath: m_Name
       value: PlayerUI 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2316726737890064501, guid: f0b40ca16bc71cc49b40fcced0b16f7f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4654296203839377099, guid: f0b40ca16bc71cc49b40fcced0b16f7f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 143733139}
+    - target: {fileID: 4654296203839377099, guid: f0b40ca16bc71cc49b40fcced0b16f7f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: changeTurn
+      objectReference: {fileID: 0}
+    - target: {fileID: 6810187210464320802, guid: f0b40ca16bc71cc49b40fcced0b16f7f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 143733139}
+    - target: {fileID: 6810187210464320802, guid: f0b40ca16bc71cc49b40fcced0b16f7f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: useAction
       objectReference: {fileID: 0}
     - target: {fileID: 6994184655647664753, guid: f0b40ca16bc71cc49b40fcced0b16f7f, type: 3}
       propertyPath: m_Pivot.x
@@ -1381,6 +1409,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerUI 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1132081813478598246, guid: 8199d9814a8dcd64491cf8610ea4cf19, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3912527076152727755, guid: 8199d9814a8dcd64491cf8610ea4cf19, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 143733139}
+    - target: {fileID: 3912527076152727755, guid: 8199d9814a8dcd64491cf8610ea4cf19, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: changeTurn
+      objectReference: {fileID: 0}
     - target: {fileID: 5199606101946175878, guid: 8199d9814a8dcd64491cf8610ea4cf19, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1460,6 +1500,14 @@ PrefabInstance:
     - target: {fileID: 5199606101946175878, guid: 8199d9814a8dcd64491cf8610ea4cf19, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6460012254331681998, guid: 8199d9814a8dcd64491cf8610ea4cf19, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 143733139}
+    - target: {fileID: 6460012254331681998, guid: 8199d9814a8dcd64491cf8610ea4cf19, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: useAction
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1622,6 +1670,11 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &1935283924 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1132081813478598246, guid: 8199d9814a8dcd64491cf8610ea4cf19, type: 3}
+  m_PrefabInstance: {fileID: 1618946125}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

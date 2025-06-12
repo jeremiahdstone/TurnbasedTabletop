@@ -9,8 +9,10 @@ public class GameManager : MonoBehaviour
 
     public int turn = 1;
     public List<GameObject> players = new List<GameObject>();
-    
+    public List<GameObject> playerUIs = new List<GameObject>();
     public GameObject currentTurnPlayer;
+
+
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -18,20 +20,30 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
         
+        
 
+    }
+
+    public void beginGame()
+    {
+        for (int i = 0; i < playerUIs.Count; i++)
+        {
+            if (i != 0)
+                playerUIs[i].SetActive(false);
+            
+
+        }
     }
 
     public void changeTurn()
     {
-        GameObject PlayerUI = GameObject.Find("PlayerUI " + currentTurnPlayer.GetComponent<Player>().PlayerNumber.ToString());
-        PlayerUI.SetActive(false);
+        playerUIs[currentTurnPlayer.GetComponent<Player>().PlayerNumber - 1].SetActive(false);
         turn++;
         int currentIndex = players.IndexOf(currentTurnPlayer);
         currentIndex = (currentIndex + 1) % players.Count;
         currentTurnPlayer = players[currentIndex];
         currentTurnPlayer.GetComponent<Player>().startTurn();
-        PlayerUI = GameObject.Find("PlayerUI " + currentTurnPlayer.GetComponent<Player>().PlayerNumber.ToString());
-        PlayerUI.SetActive(true);
+        playerUIs[currentTurnPlayer.GetComponent<Player>().PlayerNumber - 1].SetActive(true);
     }
 
     public void useAction()

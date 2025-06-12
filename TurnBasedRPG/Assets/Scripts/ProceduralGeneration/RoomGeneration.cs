@@ -46,8 +46,8 @@ namespace dungeonGen
 
             
             // IMPERMANENT SOLUTION: Disable PlayerUI for all players at the start
-            //GameObject.Find("PlayerUI 1").SetActive(false);
-            GameObject.Find("PlayerUI 2").SetActive(false);
+            
+            
         }
 
         // Update is called once per frame
@@ -102,8 +102,9 @@ namespace dungeonGen
                 gm.AddComponent<GameManager>();
             }
             GameManager.Instance.SetGrid(ToStringGrid(grid));
+            GameManager.Instance.beginGame();
             /*-------------------------------------------------------------*/
-            
+
             PrintRoom(grid);
             DrawGrid(grid);
             SpawnEntities(grid);
