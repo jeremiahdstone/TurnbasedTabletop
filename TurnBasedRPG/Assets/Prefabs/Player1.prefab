@@ -251,5 +251,3 @@ MonoBehaviour:
   bonusActions: 0
   bonusHealth: 0
   bonusDistance: 0
-  useUI: 1
-  playerUI: {fileID: 0}
